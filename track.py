@@ -155,7 +155,6 @@ class monitorPanel(object):
         # ------------------------------------------------------------------------ notify user that tracking has started
         gbl.statbar.SetStatusText('Tracking started: ' + self.mon_name)
         self.parent.thumbPanels[self.mon_ID].monitorPanel.console.writemsg('Start tracking monitor %d.' % self.mon_ID)
-#        self.parent.trkdConsList[self.mon_ID].SetFocus()
 
         # ------------------------------------------------------------------------------- locate and calculate distances
         fly_coords = self.getCoordsArray()                  # find coordinates of flies in each ROI in each frame
@@ -381,7 +380,7 @@ class monitorPanel(object):
 
         # ----------------------------------------------------------- determine how many files are needed and prep array
         listofFilesContents = []
-        moreFilesNeeded = int(math.ceil((len(array) - 10) / 32.0))    # number of additional files needed
+        moreFilesNeeded = int(math.ceil((len(array[0]) - 10) / 32.0))    # number of additional files needed
         for num in range(0, 1 + moreFilesNeeded):
             listofFilesContents.append([])                            # create an empty list for each file to be created
 

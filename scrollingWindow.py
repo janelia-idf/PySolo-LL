@@ -102,16 +102,24 @@ class scrollingWindow(wx.ScrolledWindow):     # --------------------- contails a
         if len(self.thumbPanels) > 1:  # don't remove the 0th element, which is just a descriptor that allows 1-indexing
             for gbl.mon_ID in range(len(self.thumbPanels) -1, 0, -1):
                                                             # reverse order avoids issues with list renumbering
-                self.thumbPanels[gbl.mon_ID]._Thread__stop()
-                self.thumbPanels[gbl.mon_ID].monitorPanel.keepPlaying = False        # stop playing video
-                if panelType == 'thumb':
-                    self.thumbPanels[gbl.mon_ID].monitorPanel.playTimer.Stop()           # stop the timer if there is one
-                    self.thumbPanels[gbl.mon_ID].monitorPanel.Hide()  # remove the panel from display
-                    self.thumbPanels[gbl.mon_ID].monitorPanel.Destroy()  # prevents doubled up images & flickering
-                elif panelType == 'console':
-                    self.thumbPanels[gbl.mon_ID].monitorPanel.console.Destroy()  # prevents dbld up images & flickering
+                self.thumbPanels[gbl.mon_ID]._Thread__stop()                                # stop the thread
+                self.thumbPanels[gbl.mon_ID].monitorPanel.keepPlaying = False               # stop playing video
 
-            del self.thumbPanels[gbl.mon_ID]                                    # delete the panel from the list.
+                # ------ the following actions may or may not work depending on the type of panel.
+                # try all of them even if one fails.
+                try: self.thumbPanels[gbl.mon_ID].monitorPanel.playTimer.Stop()             # stop the timer
+                except: pass
+
+                try: self.thumbPanels[gbl.mon_ID].monitorPanel.Hide()                       # hide panel from display
+                except: pass
+
+                try: self.thumbPanels[gbl.mon_ID].monitorPanel.console.Destroy()  # prevents dbld up images & flickering
+                except: pass                            # hangs around if not destroyed before monitorPanel is destroyed
+
+                try: self.thumbPanels[gbl.mon_ID].monitorPanel.Destroy()       # prevents doubled up images & flickering
+                except: pass
+
+            del self.thumbPanels[gbl.mon_ID]                                  # delete the panel from the list.
 
         self.thumbGridSizer.Clear()                                         # clear out gridsizer
         gbl.mon_ID = old_ID

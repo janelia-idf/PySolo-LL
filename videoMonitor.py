@@ -322,7 +322,7 @@ class monitorPanel(wx.Panel):
         self_MP.binders()                       # bind event handlers
 
         self_MP.SetSize(self_MP.panelSize)
-#        self_MP.SetMinSize(self_MP.GetSize())                                  # TODO: needed?
+        self_MP.SetMinSize(self_MP.GetSize())    # if panel should now be smaller this makes sure old panel isn't left in background
         self_MP.SetBackgroundColour('#A9A9A9')
 
     # ---------------------------------------------------------------------------------------------- bind event handlers
@@ -586,13 +586,10 @@ class monitorPanel(wx.Panel):
         # if ROIframe is not available, playMonitor() was probably not run before the playtimer started
 
         self_MP.frame = self_MP.captureVideo.getImage()
-
-        if self_MP.frame is None:
-            gbl.statbar.SetStatusText('Reached end of file. Monitor %d'% self_MP.mon_ID)
-            self_MP.keepPlaying = False         # since it didn't loop, make sure the playback process stops
-            self_MP.playTimer.Stop()            # notify user
-            winsound.Beep(300,200)
-            return
+        if self_MP.frame == None:
+            npsize = (self_MP.initialSize[1], self_MP.initialSize[0])   # opencv and np use opposite order
+            oneDframe = np.ones(npsize, np.uint8)
+            self_MP.frame = np.dstack((oneDframe, oneDframe, oneDframe))  # binary frame for creating mask
 
         frame2 = np.multiply(self_MP.frame.copy(), self_MP.ROIframe)        # apply mask to image
         frame3 = np.add(frame2.copy(), self_MP.RGBmask)

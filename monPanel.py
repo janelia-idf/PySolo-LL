@@ -42,7 +42,7 @@ import configurator as cfg
 import videoMonitor as VM
 import pysolovideoGlobals as gbl
 
-# TODO:  tab controls are still a little out of order.  Date and videoOn cause problems
+# TODO:  first time opened, preview panel is doubled
 
 """ ================================================================================= Create monitor configuration panel
 """
@@ -583,21 +583,20 @@ class monPanel(wx.Panel):
 
     def refreshVideo(self):
         # if new video has different size than previous, mask may be outside the image and won't show in previewpanel
-        self.Q_shouldSaveMask(self.mon_ID)                  # check to see if mask should be saved, ask, & save
         try: self.rois
         except: self.rois = []
         self.previewPanel = VM.monitorPanel(self, mon_ID=self.mon_ID, panelType='preview', loop=True, rois=self.rois)
 
-#        self.previewPanel.rois = self.rois                  # TODO:  why is this needed?
         self.previewPanel.PlayMonitor()
         self.previewPanel.playTimer.Start()                                         # PlayMonitor() can't start timer
+        self.videoSizer.Clear(True)                                 # removes old previewPanel and allows resize
+        self.videoSizer.SetMinSize(self.preview_size)
         self.videoSizer.Add(self.previewPanel, 1, wx.ALL | wx.ALIGN_CENTER, 5)
 
         if self.previewPanel.playTimer.IsRunning():
             self.previewPanel.playTimer.Stop()
             self.previewPanel.playTimer.Start(1000 / float(self.previewFPS.GetValue()))
 
-        self.videoSizer.SetMinSize(self.previewPanel.panelSize)
         self.SetSizer(self.mainSizer)
         self.Layout()
 
@@ -708,7 +707,7 @@ class monPanel(wx.Panel):
 
         self.screenUpdate(event)                                # skip event & refresh the screen
 
-    def onChangeDate(self, event):
+    def onChangeDate(self, event):                  # TODO date & time not being saved w/ configuration
         try:
             newdate = self.startDate.GetValue()                                         # get new value
         except:                 # ------ bug in wxDateTimePickerCtrl: m_date not in sync occurs if month not changed
@@ -724,7 +723,7 @@ class monPanel(wx.Panel):
         input = gbl.strdatetime2pydatetime(newdate, newtime)    # combine string date & time into python datetime object
 
         if input <> self.start_datetime:                        #  update all datetime values
-            gbl.start_datetime = gbl.cfg_dict[self.mon_ID]['start_datetime'] = self.start_datetime
+            gbl.start_datetime = gbl.cfg_dict[self.mon_ID]['start_datetime'] = self.start_datetime = input
 
                                                                 # no effect on screen
             gbl.shouldSaveCfg = True                           # configuration has changed
@@ -742,7 +741,7 @@ class monPanel(wx.Panel):
         input = gbl.strdatetime2pydatetime(newdate, newtime)    # combine string date & time into python datetime object
 
         if input <> self.start_datetime:                        #  update all datetime values
-            gbl.start_datetime = gbl.cfg_dict[self.mon_ID]['start_datetime'] = self.start_datetime
+            gbl.start_datetime = gbl.cfg_dict[self.mon_ID]['start_datetime'] = self.start_datetime = input
 
                                                                 # no effect on screen
             gbl.shouldSaveCfg = True                           # configuration has changed
@@ -906,6 +905,7 @@ class monPanel(wx.Panel):
         self.screenUpdate(None)
 
     def onMaskGen(self, event):
+        self.Q_shouldSaveMask(self.mon_ID)                  # check to see if mask should be saved, ask, & save
         self.rois, self.maskFileContents = self.previewPanel.onMaskGen(self.X, self.Y)             # run the mask generator for this preview panel
         self.clearVideo()
         self.refreshVideo()

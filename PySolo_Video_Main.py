@@ -96,7 +96,7 @@ class mainNotebook(wx.Notebook):
     def onGoToPage(self, nextpage):
         self.page_num = nextpage      # assume page will change. user cancellation sets self.page_num back to gbl.mon_ID
         gbl.statbar.SetStatusText(' ')
-
+# TODO: stop duplicate preview panels
         # ------------------------------------------------------------------------------------------------ save changes
         if gbl.mon_ID != 0:  # ------------------------------------------------------------- leaving a monitor page
             self.page_num = self.notebookPages[gbl.mon_ID].Q_shouldSaveMask(nextpage)# new mask not saved. want to save?
@@ -118,7 +118,7 @@ class mainNotebook(wx.Notebook):
         if gbl.mon_ID == 0:         # ---------------------------------------------------- refresh configuration page
             cfg.cfg_dict_to_nicknames()                                 # load configuration page parameters
             self.notebookPages[0].fillTable()                           # update the configuration table
-#            self.notebookPages[0].scrolledThumbs.clearGrid              # destroy old thumbnails
+
             self.notebookPages[0].scrolledThumbs.refreshGrid()     # restart the thumbnail windows
             self.notebookPages[0].scrolledThumbs.EnableScrolling(1, 1)  # restore scrollbars
             self.notebookPages[0].SetSizer(self.notebookPages[gbl.mon_ID].cfgPanelSizer)
@@ -129,7 +129,7 @@ class mainNotebook(wx.Notebook):
         elif gbl.mon_ID != 0:                 # TODO: why double preview panels?  changing source fixes it
             cfg.mon_dict_to_nicknames()                             # update nicknames for the selected monitor
 
-#            self.notebookPages[gbl.mon_ID].previewPanel.parent.clearVideo()         # destroy old preview panel
+
             self.notebookPages[gbl.mon_ID].refreshVideo()       # restart start video   (monPanel.py)
             self.notebookPages[gbl.mon_ID].SetSizer(self.notebookPages[gbl.mon_ID].mainSizer)
             self.notebookPages[gbl.mon_ID].Layout()
